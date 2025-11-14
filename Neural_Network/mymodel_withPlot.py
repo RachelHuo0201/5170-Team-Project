@@ -23,7 +23,7 @@ epochs = 100
 nn_neural = 64
 batch_train = 64
 batch_val = 32
-lr = 5e-4
+lr = 1e-4
 seed = 141
 torch.manual_seed(seed)
 np.random.seed(seed)

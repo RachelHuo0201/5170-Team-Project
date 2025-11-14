@@ -92,15 +92,16 @@ if (dataset_mode %in% c('white','both'))
 
 message('Data preprocessing completed.')
 
-# === Global feature order (for consistent heatmap comparison) ===
-base_df <- read.csv(file.path(out_dir, "red_cleaned.csv"), stringsAsFactors = FALSE)
-global_features <- names(base_df)[sapply(base_df, is.numeric)]
-global_features <- setdiff(global_features, "quality")
 
 
 # ================================================================
 # 2. Unsupervised K-Means clustering and visualization
 # ================================================================
+# === Global feature order (for consistent heatmap comparison) ===
+base_df <- read.csv(file.path(out_dir, "red_cleaned.csv"), stringsAsFactors = FALSE)
+global_features <- names(base_df)[sapply(base_df, is.numeric)]
+global_features <- setdiff(global_features, "quality")
+
 library(cluster)
 
 run_unsupervised_simple <- function(cleaned_csv, prefix, out_dir = ".", seed = 42) {
@@ -143,6 +144,29 @@ run_unsupervised_simple <- function(cleaned_csv, prefix, out_dir = ".", seed = 4
     labs(title = paste0(prefix, " - Mean Silhouette (k selection)"),
          x = "Number of clusters (k)", y = "Mean silhouette width")
   ggsave(file.path(out_dir2, paste0(prefix, "_silhouette.png")), g_sil, width = 5.5, height = 4)
+  
+  # --- PCA plot (2D visualization of final clusters) ---
+  pca <- prcomp(Xs, center = TRUE, scale. = TRUE)
+  pca_df <- data.frame(
+    PC1 = pca$x[,1],
+    PC2 = pca$x[,2],
+    cluster = clusters
+  )
+  
+  p_pca <- ggplot(pca_df, aes(x = PC1, y = PC2, color = cluster)) +
+    geom_point(alpha = 0.6, size = 2) +
+    theme_minimal() +
+    labs(
+      title = paste0(prefix, " - PCA of Final Clusters (k = ", k_best, ")"),
+      x = "PC1",
+      y = "PC2",
+      color = "Cluster"
+    )
+  
+  ggsave(file.path(out_dir2, paste0(prefix, "_cluster_pca.png")),
+         p_pca, width = 6.5, height = 5)
+  message("Saved PCA cluster plot.")
+  
   
   # --- Cluster centers heatmap ---
   centers_df <- as.data.frame(km_best$centers)
