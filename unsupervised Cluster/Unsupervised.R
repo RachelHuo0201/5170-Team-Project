@@ -1,109 +1,27 @@
+# ================================================================
+# Unsupervised K-Means Clustering & Visualization
+# ================================================================
 
+# --- Configuration (only for unsupervised) ---
+project_root <- "C:/yxy/data science/project/unsupervised cluster"   
 
-# === Configuration ===
-data_dir <- "C:/yxy/data science/project/phase2"                # Input data folder
-out_dir <- "C:/yxy/data science/project/phase2/out"             # Output directory
-dataset_mode <- 'both'                                          # 'red', 'white', or 'both'
-seed <- 42                                                      # Random seed for reproducibility
-do_scale <- TRUE                                                # Whether to standardize numeric predictors
+cleaned_dir <- project_root                              
+out_root    <- file.path(project_root, "out")  
+seed <- 42
 
 library(ggplot2)
+library(cluster)
+library(reshape2)
 
-
-
-# ================================================================
-# 1. Basic data preprocessing
-# ================================================================
-process_simple <- function(path, prefix, out_dir = '.', scale = TRUE, seed = 42) {
-  message('Processing dataset: ', prefix)
-  df <- read.csv(path, sep = ';', header = TRUE, stringsAsFactors = FALSE)
-  colnames(df) <- c(
-    'fixed_acidity','volatile_acidity','citric_acid','residual_sugar','chlorides',
-    'free_sulfur_dioxide','total_sulfur_dioxide','density','pH','sulphates','alcohol','quality'
-  )
-  
-  # --- Missing values and duplicates ---
-  print(colSums(is.na(df)))
-  message('Duplicates before: ', sum(duplicated(df)))
-  df <- df[!duplicated(df), ]
-  message('Duplicates after: ', sum(duplicated(df)))
-  
-  # --- Count outliers using the IQR method ---
-  num_cols <- names(df)[sapply(df, is.numeric)]
-  outlier_counts <- data.frame(variable = character(), outliers = numeric(), stringsAsFactors = FALSE)
-  for (col in num_cols) {
-    x <- df[[col]]
-    Q1 <- quantile(x, 0.25, na.rm = TRUE)
-    Q3 <- quantile(x, 0.75, na.rm = TRUE)
-    IQRv <- Q3 - Q1
-    lower <- Q1 - 1.5 * IQRv
-    upper <- Q3 + 1.5 * IQRv
-    n_out <- sum(x < lower | x > upper, na.rm = TRUE)
-    outlier_counts <- rbind(outlier_counts, data.frame(variable = col, outliers = n_out))
-  }
-  message('Outlier counts by feature:')
-  print(outlier_counts)
-  
-  # --- Create quality label (low / medium / high) ---
-  df$quality <- as.numeric(df$quality)
-  df$quality_label <- factor(
-    ifelse(df$quality >= 7, 'high',
-           ifelse(df$quality == 6, 'medium', 'low')),
-    levels = c('low','medium','high')
-  )
-  
-  # --- Optionally scale numeric predictors (except quality) ---
-  if (isTRUE(scale)) {
-    num_features <- names(df)[sapply(df, is.numeric) & names(df) != 'quality']
-    df[num_features] <- scale(df[num_features])
-  }
-  
-  # --- Train/test split (80/20) ---
-  set.seed(seed)
-  n <- nrow(df)
-  test_idx <- sample(seq_len(n), size = floor(0.2 * n))
-  train <- df[-test_idx, ]
-  test <- df[test_idx, ]
-  
-  # --- Save cleaned outputs ---
-  if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
-  write.csv(df, file = file.path(out_dir, paste0(prefix, '_cleaned.csv')), row.names = FALSE)
-  write.csv(train, file = file.path(out_dir, paste0(prefix, '_train.csv')), row.names = FALSE)
-  write.csv(test, file = file.path(out_dir, paste0(prefix, '_test.csv')), row.names = FALSE)
-  write.csv(outlier_counts, file = file.path(out_dir, paste0(prefix, '_outlier_counts.csv')), row.names = FALSE)
-  
-  # --- Plot outlier counts per feature ---
-  plots_dir <- file.path(out_dir, 'plots')
-  if (!dir.exists(plots_dir)) dir.create(plots_dir)
-  ggsave(
-    filename = file.path(plots_dir, paste0(prefix, '_outlier_counts.png')),
-    plot = ggplot(outlier_counts, aes(x = reorder(variable, -outliers), y = outliers)) +
-      geom_bar(stat = 'identity', fill = 'steelblue') + theme_minimal(),
-    width = 8, height = 3
-  )
-  
-  message('Saved cleaned data to: ', normalizePath(out_dir))
-}
-
-if (dataset_mode %in% c('red','both'))
-  process_simple(file.path(data_dir, 'winequality-red.csv'), 'red', out_dir = out_dir, scale = do_scale, seed = seed)
-if (dataset_mode %in% c('white','both'))
-  process_simple(file.path(data_dir, 'winequality-white.csv'), 'white', out_dir = out_dir, scale = do_scale, seed = seed)
-
-message('Data preprocessing completed.')
-
-
-
-# ================================================================
-# 2. Unsupervised K-Means clustering and visualization
-# ================================================================
 # === Global feature order (for consistent heatmap comparison) ===
-base_df <- read.csv(file.path(out_dir, "red_cleaned.csv"), stringsAsFactors = FALSE)
+base_df <- read.csv(file.path(cleaned_dir, "red_cleaned.csv"), stringsAsFactors = FALSE)
 global_features <- names(base_df)[sapply(base_df, is.numeric)]
 global_features <- setdiff(global_features, "quality")
 
-library(cluster)
 
+# ================================================================
+# 1. Unsupervised K-Means clustering and visualization
+# ================================================================
 run_unsupervised_simple <- function(cleaned_csv, prefix, out_dir = ".", seed = 42) {
   set.seed(seed)
   
@@ -114,7 +32,7 @@ run_unsupervised_simple <- function(cleaned_csv, prefix, out_dir = ".", seed = 4
   num_cols <- names(data_clean)[sapply(data_clean, is.numeric)]
   num_cols <- setdiff(num_cols, c("quality"))
   X <- data_clean[, num_cols, drop = FALSE]
-  Xs <- scale(X)
+  Xs <- scale(X)   # 如果预处理已经标准化，可以改成 as.matrix(X)
   
   # --- Determine optimal k (2–8) using mean silhouette width ---
   ks <- 2:8
@@ -132,8 +50,8 @@ run_unsupervised_simple <- function(cleaned_csv, prefix, out_dir = ".", seed = 4
   km_best <- kmeans(Xs, centers = k_best, nstart = 25, iter.max = 200)
   clusters <- factor(km_best$cluster)
   
-  # --- Output directory ---
-  out_dir2 <- file.path(out_dir, "unsupervised")
+  # --- Output directory for unsupervised results ---
+  out_dir2 <- out_dir
   if (!dir.exists(out_dir2)) dir.create(out_dir2, recursive = TRUE)
   
   # --- Silhouette curve ---
@@ -205,7 +123,6 @@ run_unsupervised_simple <- function(cleaned_csv, prefix, out_dir = ".", seed = 4
   write.csv(cross_tab_pct, file.path(out_dir2, paste0(prefix, "_cluster_vs_quality_percent.csv")), row.names = TRUE)
   
   # --- Heatmap of cluster vs quality (% per column) ---
-  library(reshape2)
   df_prop <- cross_tab_pct
   df_prop$cluster <- rownames(df_prop)
   df_long <- melt(df_prop, id.vars = "cluster", variable.name = "quality", value.name = "percent")
@@ -231,7 +148,7 @@ run_unsupervised_simple <- function(cleaned_csv, prefix, out_dir = ".", seed = 4
 
 
 # ================================================================
-# 3. Quality-based Feature Means Heatmap (for supervised comparison)
+# 2. Quality-based Feature Means Heatmap (for supervised comparison)
 # ================================================================
 plot_quality_centers_heatmap <- function(
     cleaned_csv, prefix, out_dir = ".", use_zscore = TRUE, label_cells = TRUE) {
@@ -247,7 +164,6 @@ plot_quality_centers_heatmap <- function(
   grp <- factor(df$quality, levels = sort(unique(df$quality)))
   agg <- aggregate(Xs, by = list(Quality = grp), FUN = mean, na.rm = TRUE)
   
-  library(reshape2)
   long <- melt(agg, id.vars = "Quality", variable.name = "feature", value.name = "mean_val")
   long$feature <- factor(long$feature, levels = global_features)
   
@@ -260,7 +176,7 @@ plot_quality_centers_heatmap <- function(
     labs(title = paste0(prefix, " - Quality Group Centers (z-scored Feature Means)"),
          x = "Feature", y = "Quality", fill = "Mean (z)")
   
-  out_dir2 <- file.path(out_dir, "unsupervised")
+  out_dir2 <- out_dir
   if (!dir.exists(out_dir2)) dir.create(out_dir2, recursive = TRUE)
   fname <- file.path(out_dir2, paste0(prefix, "_quality_centers_quality_z.png"))
   ggsave(fname, p, width = 7.5, height = 4.8)
@@ -269,35 +185,35 @@ plot_quality_centers_heatmap <- function(
 
 
 # ================================================================
-# 4. Run all experiments
+# 3. Run all experiments 
 # ================================================================
 run_unsupervised_simple(
-  cleaned_csv = "C:/yxy/data science/project/phase2/out/red_cleaned.csv",
+  cleaned_csv = file.path(cleaned_dir, "red_cleaned.csv"),
   prefix = "red",
-  out_dir = "C:/yxy/data science/project/phase2/out",
-  seed = 42
+  out_dir = out_root,
+  seed = seed
 )
 
 run_unsupervised_simple(
-  cleaned_csv = "C:/yxy/data science/project/phase2/out/white_cleaned.csv",
+  cleaned_csv = file.path(cleaned_dir, "white_cleaned.csv"),
   prefix = "white",
-  out_dir = "C:/yxy/data science/project/phase2/out",
-  seed = 42
+  out_dir = out_root,
+  seed = seed
 )
 
 plot_quality_centers_heatmap(
-  cleaned_csv = "C:/yxy/data science/project/phase2/out/red_cleaned.csv",
+  cleaned_csv = file.path(cleaned_dir, "red_cleaned.csv"),
   prefix = "red",
-  out_dir = "C:/yxy/data science/project/phase2/out",
+  out_dir = out_root,
   use_zscore = TRUE, label_cells = TRUE
 )
 
 plot_quality_centers_heatmap(
-  cleaned_csv = "C:/yxy/data science/project/phase2/out/white_cleaned.csv",
+  cleaned_csv = file.path(cleaned_dir, "white_cleaned.csv"),
   prefix = "white",
-  out_dir = "C:/yxy/data science/project/phase2/out",
+  out_dir = out_root,
   use_zscore = TRUE, label_cells = TRUE
 )
 
 message("All unsupervised and quality-based outputs saved under: ",
-        "C:/yxy/data science/project/phase2/out/unsupervised")
+        file.path(out_root, "unsupervised"))
