@@ -15,9 +15,10 @@ This project performs comprehensive analysis and prediction of wine quality usin
 │   │   ├── FE+Supervised Tree models_final.R
 │   │   ├── winequality-red.csv
 │   │   └── winequality-white.csv
-│   └── Neural_Network/
-│       ├── Deep Neural Network.py
-│       └── wine_feature_engineered.csv
+│   ├── Neural_Network/
+│   │   ├── Deep Neural Network.py
+│   │   └── wine_feature_engineered.csv
+│   └── model_comparison.R          # Comprehensive model comparison & evaluation
 └── unsupervised Cluster/
     ├── Unsupervised.R
     ├── red_cleaned.csv
@@ -107,6 +108,35 @@ cd supervised_model/Neural_Network
 python "Deep Neural Network.py"
 ```
 
+#### Model Comparison (`model_comparison.R`)
+
+Comprehensive comparison framework for all supervised models:
+
+**Features:**
+- Unified evaluation pipeline across all models
+- Side-by-side performance comparison
+- Visual analytics:
+  - Performance metrics bar charts
+  - ROC curves comparison
+  - Confusion matrix heatmaps
+  - Feature importance plots
+- Statistical significance testing
+- Model ranking and recommendation
+
+**Metrics Analyzed:**
+- Accuracy
+- Precision, Recall, F1-Score
+- AUC-ROC
+- G-Mean
+- Training time
+- Prediction time
+
+**How to run:**
+```r
+setwd("/path/to/5170-Team-Project/")
+source("model_comparison.R")
+```
+
 ### 4. Unsupervised Model (`unsupervised Cluster/Unsupervised.R`)
 
 K-Means clustering to discover natural wine groupings:
@@ -135,7 +165,7 @@ source("Unsupervised.R")
 install.packages(c(
   "readr", "dplyr", "caret", "rpart", "randomForest", 
   "xgboost", "gains", "rpart.plot", "ggplot2", "corrplot",
-  "cluster", "reshape2"
+  "cluster", "reshape2", "pROC", "gridExtra"
 ))
 ```
 
@@ -157,6 +187,9 @@ Key metrics:
 - Precision & Recall (for "high" quality class)
 - F1-Score
 - G-Mean (geometric mean of sensitivity and specificity)
+- AUC-ROC
+
+The `model_comparison.R` script provides a comprehensive analysis with visualizations to identify the best performing model for wine quality prediction.
 
 ### Unsupervised Clustering
 
