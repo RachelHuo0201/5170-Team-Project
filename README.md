@@ -1,4 +1,4 @@
-# Wine Quality Analysis & Prediction
+# DTI 5126 Wine Quality Analysis & Prediction
 
 ## Project Overview
 
