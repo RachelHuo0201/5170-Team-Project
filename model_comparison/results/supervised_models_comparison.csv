@@ -1,0 +1,5 @@
+Model,Accuracy,Precision,Recall,F1-Score,G-mean,Type,Interpretability,Training Time,Status
+Decision Tree,0.7867,,,0.448,0.58,Tree-based,High,Fast,Deleted
+XGBoost,0.8787,,,0.554,0.688,Tree-based,Medium,Medium,Deleted
+Random Forest,0.8695,,,0.471,0.61,Tree-based,Medium,Medium,Deleted
+Deep Neural Network,0.7575,0.799,0.818,0.809,,Neural Network,Low,Slow,Active

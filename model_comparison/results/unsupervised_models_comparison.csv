@@ -1,0 +1,3 @@
+Model,Optimal K,Silhouette Score,Type,Purpose
+K-Means (Red Wine),2,0.205,Clustering,Pattern Discovery
+K-Means (White Wine),2,0.213,Clustering,Pattern Discovery

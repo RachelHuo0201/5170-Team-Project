@@ -1,0 +1,6 @@
+Approach,Model,Key Metric,Strengths,Weaknesses,Best Use Case
+Supervised Learning,XGBoost (Best),87.87% Accuracy,"Highest accuracy, good F1-score, handles imbalanced data","Less interpretable, requires tuning, code deleted",Production deployment (if restored)
+Supervised Learning,Random Forest,86.95% Accuracy,"Good accuracy, robust to overfitting, feature importance","Less interpretable, slower than single tree, code deleted",Feature importance analysis (if restored)
+Supervised Learning,Decision Tree,78.67% Accuracy,"Highly interpretable, fast training, simple rules","Lowest accuracy, prone to overfitting, code deleted","Quick baseline, educational purposes"
+Supervised Learning,Deep Neural Network (Current),"75.75% Accuracy, 80.9% F1","Good recall (81.8%), captures complex patterns, high F1","Lowest accuracy, slow training, requires many epochs, less interpretable","Current production model, complex pattern detection"
+Unsupervised Learning,K-Means Clustering,Silhouette: 0.205-0.213,"Reveals natural groupings, no labels needed, pattern discovery","No direct quality prediction, moderate silhouette scores, needs interpretation","Exploratory analysis, customer segmentation"

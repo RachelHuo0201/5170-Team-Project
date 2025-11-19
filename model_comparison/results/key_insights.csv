@@ -1,0 +1,9 @@
+Category,Insight,Impact,Recommendation
+Best Performing Model,XGBoost achieved the highest accuracy (87.87%) but was deleted from the repository,Critical,Consider restoring XGBoost or retraining for production use
+Most Balanced Model,Deep Neural Network shows the best balance of precision (79.9%) and recall (81.8%) with F1=0.809,High,DNN is suitable for current deployment but consider ensemble methods
+Most Interpretable,Decision Tree offers highest interpretability but lowest accuracy (78.67%),Medium,Keep a simple tree model for stakeholder explanations
+Current Model Status,"Only DNN is currently active; all tree-based models were removed, limiting model comparison options",High,Restore deleted models for comprehensive comparison and ensemble options
+Clustering Insights,K-Means clustering reveals 2 natural groups in both red and white wines with moderate silhouette scores (0.205-0.213),Medium,Use clustering for customer segmentation and targeted marketing
+Data Quality,Clusters show correlation with quality: Cluster 1 tends toward higher quality wines,High,Validate clustering patterns with domain experts in winemaking
+Feature Engineering,"Engineered features (acidity_ratio, alcohol_va_ratio, etc.) improved model performance",High,Continue feature engineering with domain knowledge
+Class Imbalance,"All models struggle with minority class (high-quality wines), indicating class imbalance",Critical,"Implement SMOTE, class weights, or stratified sampling to address imbalance"
