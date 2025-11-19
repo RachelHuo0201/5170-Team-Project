@@ -52,7 +52,7 @@ Data preparation pipeline:
   - `sugar_body_ratio = residual.sugar / (1/alcohol)`
   - `sulfur_efficiency = free.sulfur.dioxide / fixed.acidity`
 - Binary label creation: quality ≥ 6 → "high", otherwise "low"
-- Train/test split (60/40)
+- Train/test split
 
 ### 3. Supervised Models
 
