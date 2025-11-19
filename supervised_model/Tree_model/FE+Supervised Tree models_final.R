@@ -11,9 +11,9 @@ library(corrplot)
 
 # Read dataset, combine them and feature engineering
 
-red <- read_delim("Desktop/FE+Tree-model/winequality-red.csv", 
-                              delim = ";", escape_double = FALSE, trim_ws = TRUE)
-white <- read_delim("Desktop/FE+Tree-model/winequality-white.csv", 
+red <- read_delim("winequality-red.csv",
+                  delim = ";", escape_double = FALSE, trim_ws = TRUE)
+white <- read_delim("winequality-white.csv",
                     delim = ";", escape_double = FALSE, trim_ws = TRUE)
 names(red) <- make.names(names(red))
 names(white)  <- make.names(names(white))
@@ -72,7 +72,7 @@ compute_metrics <- function(pred, truth) {
   recall   <- as.numeric(cm$byClass["Recall"])
   F1  <- 2 * precision * recall / (precision + recall)
   G   <- sqrt(as.numeric(cm$byClass["Sensitivity"]) * as.numeric(cm$byClass["Specificity"]))
-  c(Accuracy = acc, F1 = F1, Gmean = G)
+  c(Accuracy = acc, Precision = precision, Recall = recall, F1 = F1, Gmean = G)
 }
 
 
@@ -81,9 +81,9 @@ compute_metrics <- function(pred, truth) {
 folds <- createFolds(train$label, k = 5, list = TRUE)
 K <- length(folds)
 
-res_dt  <- matrix(NA, K, 3); colnames(res_dt)  <- c("Accuracy","F1","Gmean")
-res_rf  <- matrix(NA, K, 3); colnames(res_rf)  <- c("Accuracy","F1","Gmean")
-res_xgb <- matrix(NA, K, 3); colnames(res_xgb) <- c("Accuracy","F1","Gmean")
+res_dt  <- matrix(NA, K, 5); colnames(res_dt)  <- c("Accuracy","Precision","Recall","F1","Gmean")
+res_rf  <- matrix(NA, K, 5); colnames(res_rf)  <- c("Accuracy","Precision","Recall","F1","Gmean")
+res_xgb <- matrix(NA, K, 5); colnames(res_xgb) <- c("Accuracy","Precision","Recall","F1","Gmean")
 
 # (1). CV of Decision Tree
 

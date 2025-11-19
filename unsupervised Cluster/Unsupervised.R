@@ -3,7 +3,7 @@
 # ================================================================
 
 # --- Configuration (only for unsupervised) ---
-project_root <- "C:/yxy/data science/project/unsupervised cluster"   
+project_root <- "."   
 
 cleaned_dir <- project_root                              
 out_root    <- file.path(project_root, "out")  
@@ -32,7 +32,7 @@ run_unsupervised_simple <- function(cleaned_csv, prefix, out_dir = ".", seed = 4
   num_cols <- names(data_clean)[sapply(data_clean, is.numeric)]
   num_cols <- setdiff(num_cols, c("quality"))
   X <- data_clean[, num_cols, drop = FALSE]
-  Xs <- scale(X)   # 如果预处理已经标准化，可以改成 as.matrix(X)
+  Xs <- scale(X)   # if after normalization as.matrix(X)
   
   # --- Determine optimal k (2–8) using mean silhouette width ---
   ks <- 2:8

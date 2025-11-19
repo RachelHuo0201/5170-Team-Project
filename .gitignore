@@ -1,0 +1,28 @@
+# IDE / OS clutter
+.vscode/
+.Rproj.user/
+.DS_Store
+
+# R artifacts
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# Python / virtual envs
+venv/
+.venv/
+env/
+__pycache__/
+
+# Notebooks & logs
+.ipynb_checkpoints/
+logs/
+*.log
+
+# Model outputs
+supervised_model/model_comparison/model_comparison_metrics.csv
+*.rds
+*.Rds
+*.h5
+*.keras
